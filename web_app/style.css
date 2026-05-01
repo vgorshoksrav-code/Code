@@ -494,3 +494,208 @@ th {
 .player-section {
     margin: 24px 0;
 }
+
+/* Гильдии */
+.guild-search {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.search-input {
+    flex: 1;
+    background: rgba(30,30,58,0.8);
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 16px;
+    padding: 12px;
+    color: #fff;
+    font-size: 16px;
+}
+.guild-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+.guild-search-item {
+    background: rgba(30,30,58,0.6);
+    border-radius: 16px;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255,215,0,0.15);
+}
+.join-guild-btn {
+    background: #ffd700;
+    color: #0a0a1a;
+    border: none;
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.guild-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.guild-name-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+.guild-level {
+    background: linear-gradient(145deg, #ffd700, #ffb347);
+    color: #0a0a1a;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+}
+.guild-desc {
+    opacity: 0.7;
+    margin: 8px 0;
+}
+.guild-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 14px;
+}
+.guild-buildings {
+    background: rgba(30,30,58,0.6);
+    border-radius: 20px;
+    padding: 16px;
+    margin: 16px 0;
+}
+.building-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.upgrade-building-btn {
+    background: #ffd700;
+    color: #0a0a1a;
+    border: none;
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.guild-contribute {
+    background: rgba(30,30,58,0.6);
+    border-radius: 20px;
+    padding: 16px;
+    margin: 16px 0;
+}
+.contribute-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+.contribute-btn {
+    background: linear-gradient(145deg, #2a2a4a, #1a1a2a);
+    color: #ffd700;
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 16px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+.guild-chat-section {
+    background: rgba(30,30,58,0.6);
+    border-radius: 20px;
+    padding: 16px;
+    margin: 16px 0;
+}
+.guild-chat-messages {
+    height: 200px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 12px;
+    margin: 8px 0;
+}
+.chat-message {
+    padding: 4px 0;
+    font-size: 14px;
+}
+.guild-chat-input {
+    display: flex;
+    gap: 8px;
+}
+.guild-members-section {
+    background: rgba(30,30,58,0.6);
+    border-radius: 20px;
+    padding: 16px;
+    margin: 16px 0;
+}
+.member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.promote-btn {
+    background: none;
+    border: 1px solid rgba(255,215,0,0.3);
+    color: #ffd700;
+    border-radius: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+.guild-raid-section {
+    background: rgba(30,30,58,0.6);
+    border-radius: 20px;
+    padding: 16px;
+    margin: 16px 0;
+}
+.raid-boss-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+.raid-hp {
+    background: linear-gradient(90deg, #ff0000, #ff6600) !important;
+}
+.guild-leaderboard {
+    background: rgba(30,30,58,0.6);
+    border-radius: 20px;
+    padding: 16px;
+    margin: 16px 0;
+}
+.leaderboard-item {
+    padding: 6px 0;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.danger-btn {
+    background: linear-gradient(145deg, #ff4444, #ff6666) !important;
+    margin-top: 16px;
+}
+.modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+.modal-content {
+    background: rgba(30,30,58,0.95);
+    border-radius: 24px;
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    border: 2px solid rgba(255,215,0,0.3);
+}
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    margin: 8px 0;
+}
