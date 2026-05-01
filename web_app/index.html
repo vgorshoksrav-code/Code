@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>Эхарис: Дуэль душ</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <canvas id="particlesCanvas"></canvas>
+    <div class="content">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="duel">⚔️ Дуэль</button>
+            <button class="tab-btn" data-tab="campaign">🏰 PvE</button>
+            <button class="tab-btn" data-tab="guild">🏛️ Гильдия</button>
+            <button class="tab-btn" data-tab="hero">👤 Герой</button>
+            <button class="tab-btn" data-tab="leaderboard">📊 Лидеры</button>
+            <button class="tab-btn" data-tab="shop">✨ Лавка</button>
+        </div>
+
+        <!-- Вкладка Дуэль -->
+        <div id="duel" class="tab-content active">
+            <div class="arena">
+                <div class="player opponent">
+                    <div class="avatar" id="opponentAvatar">👤</div>
+                    <div class="name" id="opponentName">Противник</div>
+                    <div class="hp-bar"><div class="hp-fill" id="opponentHpFill" style="width:100%"></div></div>
+                    <div class="hp-text"><span id="opponentHp">100</span>/100</div>
+                </div>
+                <div class="vs">VS</div>
+                <div class="player me">
+                    <div class="avatar" id="myAvatar">🧙</div>
+                    <div class="name" id="myName">Вы</div>
+                    <div class="hp-bar"><div class="hp-fill" id="myHpFill" style="width:100%"></div></div>
+                    <div class="hp-text"><span id="myHp">100</span>/100</div>
+                </div>
+            </div>
+            <div class="energy-bar">⚡ Энергия: <span id="energy">10</span> / <span id="maxEnergy">30</span></div>
+            <div class="skills">
+                <button class="skill" data-skill="0">🔥<br>Огн.стрела</button>
+                <button class="skill" data-skill="1">❄️<br>Лед.щит</button>
+                <button class="skill" data-skill="2">🌿<br>Связь</button>
+                <button class="skill" data-skill="3">⚡<br>Цеп.молния</button>
+                <button class="skill" data-skill="4">🌟<br>Зов предков</button>
+            </div>
+            <button id="findDuelBtn" class="action-btn">🔍 Найти бой</button>
+            <div class="battle-log" id="battleLog"></div>
+        </div>
+
+        <!-- Вкладка Кампания -->
+        <div id="campaign" class="tab-content">
+            <h3>🏰 Кампания Эхариса</h3>
+            <div id="chaptersContainer" class="chapters-grid"></div>
+            
+            <div id="bossBattleModal" class="boss-modal" style="display:none;">
+                <div class="boss-battle">
+                    <button id="closeBossBattle" class="close-btn">✖</button>
+                    <h3 id="bossName">Босс</h3>
+                    <div class="boss-avatar">👹</div>
+                    <div class="hp-bar">
+                        <div class="hp-fill boss-hp" id="bossHpFill" style="width:100%"></div>
+                    </div>
+                    <div class="hp-text"><span id="bossHp">100</span>/<span id="bossMaxHp">100</span></div>
+                    
+                    <div class="player-section">
+                        <div class="avatar">🧙</div>
+                        <div class="hp-bar">
+                            <div class="hp-fill" id="pveMyHpFill" style="width:100%"></div>
+                        </div>
+                        <div class="hp-text"><span id="pveMyHp">100</span>/100</div>
+                        <div class="energy-bar">⚡ Энергия: <span id="pveEnergy">10</span></div>
+                    </div>
+                    
+                    <div class="skills">
+                        <button class="skill pve-skill" data-skill="0">🔥<br>Огн.стрела</button>
+                        <button class="skill pve-skill" data-skill="1">❄️<br>Лед.щит</button>
+                        <button class="skill pve-skill" data-skill="2">🌿<br>Связь</button>
+                        <button class="skill pve-skill" data-skill="3">⚡<br>Цеп.молния</button>
+                        <button class="skill pve-skill" data-skill="4">🌟<br>Зов предков</button>
+                    </div>
+                    
+                    <div class="battle-log" id="pveBattleLog"></div>
+                    
+                    <button id="claimPveRewards" class="action-btn" style="display:none;">🎁 Забрать награду</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Гильдия -->
+        <div id="guild" class="tab-content">
+            <h3>🏛️ Гильдии</h3>
+            
+            <!-- Если игрок не в гильдии -->
+            <div id="noGuildSection">
+                <div class="guild-search">
+                    <input type="text" id="guildSearchInput" placeholder="Поиск гильдии..." class="search-input">
+                    <button id="searchGuildsBtn" class="action-btn">🔍 Найти</button>
+                </div>
+                <div id="guildSearchResults" class="guild-list"></div>
+                <button id="createGuildBtn" class="action-btn">🏰 Создать гильдию (500 💎)</button>
+                
+                <!-- Модальное окно создания гильдии -->
+                <div id="createGuildModal" class="modal" style="display:none;">
+                    <div class="modal-content">
+                        <button class="close-btn" id="closeCreateGuild">✖</button>
+                        <h3>Создание гильдии</h3>
+                        <input type="text" id="newGuildName" placeholder="Название гильдии" class="search-input">
+                        <input type="text" id="newGuildEmoji" placeholder="Эмодзи (🏰)" class="search-input" maxlength="2">
+                        <textarea id="newGuildDescription" placeholder="Описание..." class="search-input" rows="3"></textarea>
+                        <button id="confirmCreateGuild" class="action-btn">Создать (500 💎)</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Если игрок в гильдии -->
+            <div id="guildSection" style="display:none;">
+                <div class="guild-header">
+                    <div class="guild-name-section">
+                        <span id="guildEmoji">🏰</span>
+                        <h3 id="guildName">Название</h3>
+                        <span id="guildLevel" class="guild-level">Ур. 1</span>
+                    </div>
+                    <p id="guildDescription" class="guild-desc"></p>
+                    <div class="guild-stats">
+                        <div class="guild-stat">⭐ Очки: <span id="guildWarPoints">0</span></div>
+                        <div class="guild-stat">📈 Опыт: <span id="guildExp">0</span>/<span id="guildExpMax">1000</span></div>
+                        <div class="guild-stat">👥 Участники: <span id="guildMemberCount">0</span></div>
+                    </div>
+                </div>
+                
+                <!-- Здания -->
+                <div class="guild-buildings">
+                    <h4>🏗️ Здания гильдии</h4>
+                    <div id="buildingsList"></div>
+                </div>
+                
+                <!-- Вклад -->
+                <div class="guild-contribute">
+                    <h4>💎 Внести вклад</h4>
+                    <div class="contribute-options">
+                        <button class="contribute-btn" data-amount="10">10 💎</button>
+                        <button class="contribute-btn" data-amount="50">50 💎</button>
+                        <button class="contribute-btn" data-amount="100">100 💎</button>
+                        <button class="contribute-btn" data-amount="500">500 💎</button>
+                    </div>
+                </div>
+                
+                <!-- Чат -->
+                <div class="guild-chat-section">
+                    <h4>💬 Чат гильдии</h4>
+                    <div id="guildChatMessages" class="guild-chat-messages"></div>
+                    <div class="guild-chat-input">
+                        <input type="text" id="guildMessageInput" placeholder="Сообщение..." class="search-input">
+                        <button id="sendGuildMessage" class="action-btn">📨</button>
+                    </div>
+                </div>
+                
+                <!-- Участники -->
+                <div class="guild-members-section">
+                    <h4>👥 Участники</h4>
+                    <div id="guildMembersList" class="members-list"></div>
+                </div>
+                
+                <!-- Рейд -->
+                <div class="guild-raid-section">
+                    <h4>🐉 Рейд гильдии</h4>
+                    <div id="raidInfo"></div>
+                    <div id="activeRaid" style="display:none;">
+                        <div class="raid-boss">
+                            <div class="raid-boss-name" id="raidBossName"></div>
+                            <div class="hp-bar">
+                                <div class="hp-fill raid-hp" id="raidBossHpFill" style="width:100%"></div>
+                            </div>
+                            <div class="hp-text"><span id="raidBossCurrentHp">0</span>/<span id="raidBossMaxHp">0</span></div>
+                            <button id="attackRaidBoss" class="action-btn">⚔️ Атаковать (10 ⚡)</button>
+                        </div>
+                    </div>
+                    <button id="startRaidBtn" class="action-btn" style="display:none;">🐉 Начать рейд (1000 ⭐)</button>
+                </div>
+                
+                <button id="leaveGuildBtn" class="action-btn danger-btn">🚪 Покинуть гильдию</button>
+            </div>
+            
+            <!-- Топ гильдий -->
+            <div class="guild-leaderboard">
+                <h4>🏆 Топ гильдий</h4>
+                <div id="guildLeaderboardList"></div>
+            </div>
+        </div>
+
+        <!-- Вкладка Герой -->
+        <div id="hero" class="tab-content">
+            <div class="stats-card">
+                <h3>📊 Характеристики</h3>
+                <div class="stat-row">⚔️ Сила: <span id="attackStat">0</span>%</div>
+                <div class="stat-row">🛡️ Защита: <span id="defenseStat">0</span>%</div>
+                <div class="stat-row">🔋 Макс.энергия: <span id="energyStat">0</span>%</div>
+                <div class="stat-row">🍀 Удача (крит): <span id="luckStat">10</span>%</div>
+            </div>
+            <div class="skills-upgrade">
+                <h4>🌀 Уровни скилов</h4>
+                <div id="skillsLevels" class="skills-list"></div>
+                <div class="shards-balance">💎 Осколков: <span id="shardsCount">0</span></div>
+            </div>
+            <div class="skins-gallery">
+                <h4>🎭 Мои скины</h4>
+                <div id="skinsList" class="skins-grid"></div>
+            </div>
+        </div>
+
+        <!-- Вкладка Лидеры -->
+        <div id="leaderboard" class="tab-content">
+            <h3>🏆 Топ-20 игроков</h3>
+            <div class="leaderboard-container">
+                <table id="leaderboardTable">
+                    <thead>
+                        <tr><th>#</th><th>Игрок</th><th>Ранг</th><th>Победы</th><th>Скин</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Вкладка Лавка -->
+        <div id="shop" class="tab-content">
+            <h3>✨ Магазин скинов</h3>
+            <div id="shopItems" class="shop-grid"></div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
