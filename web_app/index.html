@@ -12,6 +12,7 @@
     <div class="content">
         <div class="tabs">
             <button class="tab-btn active" data-tab="duel">⚔️ Дуэль</button>
+            <button class="tab-btn" data-tab="campaign">🏰 Кампания</button>
             <button class="tab-btn" data-tab="hero">👤 Герой</button>
             <button class="tab-btn" data-tab="leaderboard">📊 Лидеры</button>
             <button class="tab-btn" data-tab="shop">✨ Лавка</button>
@@ -44,6 +45,45 @@
             </div>
             <button id="findDuelBtn" class="action-btn">🔍 Найти бой</button>
             <div class="battle-log" id="battleLog"></div>
+        </div>
+
+        <!-- Вкладка Кампания -->
+        <div id="campaign" class="tab-content">
+            <h3>🏰 Кампания Эхариса</h3>
+            <div id="chaptersContainer" class="chapters-grid"></div>
+            
+            <div id="bossBattleModal" class="boss-modal" style="display:none;">
+                <div class="boss-battle">
+                    <button id="closeBossBattle" class="close-btn">✖</button>
+                    <h3 id="bossName">Босс</h3>
+                    <div class="boss-avatar">👹</div>
+                    <div class="hp-bar">
+                        <div class="hp-fill boss-hp" id="bossHpFill" style="width:100%"></div>
+                    </div>
+                    <div class="hp-text"><span id="bossHp">100</span>/<span id="bossMaxHp">100</span></div>
+                    
+                    <div class="player-section">
+                        <div class="avatar">🧙</div>
+                        <div class="hp-bar">
+                            <div class="hp-fill" id="pveMyHpFill" style="width:100%"></div>
+                        </div>
+                        <div class="hp-text"><span id="pveMyHp">100</span>/100</div>
+                        <div class="energy-bar">⚡ Энергия: <span id="pveEnergy">10</span></div>
+                    </div>
+                    
+                    <div class="skills">
+                        <button class="skill pve-skill" data-skill="0">🔥<br>Огн.стрела</button>
+                        <button class="skill pve-skill" data-skill="1">❄️<br>Лед.щит</button>
+                        <button class="skill pve-skill" data-skill="2">🌿<br>Связь</button>
+                        <button class="skill pve-skill" data-skill="3">⚡<br>Цеп.молния</button>
+                        <button class="skill pve-skill" data-skill="4">🌟<br>Зов предков</button>
+                    </div>
+                    
+                    <div class="battle-log" id="pveBattleLog"></div>
+                    
+                    <button id="claimPveRewards" class="action-btn" style="display:none;">🎁 Забрать награду</button>
+                </div>
+            </div>
         </div>
 
         <!-- Вкладка Герой -->
