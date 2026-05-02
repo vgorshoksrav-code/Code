@@ -1,9 +1,3 @@
-
-
-Напишите полный код в файле api.py.
-баш
-
-cat > /home/claude/echaris/api.py << 'PYEOF'
 import json, uuid
 from datetime import date, datetime, timedelta
 import random
