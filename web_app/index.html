@@ -2,369 +2,432 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,user-scalable=no">
 <title>Эхарис: Дуэль душ</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+<canvas id="bgCanvas"></canvas>
 
-<canvas id="particlesCanvas"></canvas>
-
-<!-- SPLASH SCREEN -->
-<div id="splashScreen" class="splash">
+<!-- ═══ SPLASH ═════════════════════════════════════════════════ -->
+<div id="splash" class="scene">
+  <div class="splash-orb"></div>
   <div class="splash-logo">🌌</div>
-  <div class="splash-title">ЭХАРИС</div>
-  <div class="splash-subtitle">Дуэль Душ</div>
-  <div class="splash-bar"><div class="splash-fill" id="splashFill"></div></div>
+  <h1 class="splash-title">ЭХАРИС</h1>
+  <p class="splash-sub">Дуэль Душ</p>
+  <div class="progress-bar"><div id="splashBar" class="progress-fill"></div></div>
+  <p id="splashHint" class="hint-text">Инициализация...</p>
 </div>
 
-<!-- TUTORIAL OVERLAY -->
-<div id="tutorialOverlay" class="tutorial-overlay" style="display:none">
-  <div class="tutorial-box">
-    <div class="tutorial-icon">🌟</div>
-    <h2 id="tutorialTitle">Добро пожаловать!</h2>
-    <p id="tutorialText">Текст подсказки</p>
-    <div class="tutorial-dots" id="tutorialDots"></div>
-    <button class="action-btn" id="tutorialNextBtn">Далее →</button>
-  </div>
-</div>
+<!-- ═══ MAIN APP ════════════════════════════════════════════════ -->
+<div id="appScene" class="scene" style="display:none">
 
-<!-- DAILY GIFT POPUP -->
-<div id="giftModal" class="modal-overlay" style="display:none">
-  <div class="gift-box">
-    <div class="gift-icon">🎁</div>
-    <h3>Ежедневный подарок!</h3>
-    <div id="giftRewardsList" class="gift-rewards"></div>
-    <button class="action-btn" id="claimGiftBtn">Забрать!</button>
-  </div>
-</div>
-
-<!-- MAIN APP -->
-<div class="content" id="mainContent" style="display:none">
-
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div class="topbar-user">
-      <span id="topbarAvatar" class="topbar-avatar">🧙</span>
-      <div class="topbar-info">
-        <span id="topbarName" class="topbar-name">Загрузка...</span>
-        <span id="topbarRank" class="topbar-rank">⚔️ 1000</span>
+  <header class="topbar" id="topbar">
+    <div class="tb-left">
+      <div class="hero-avatar-chip" id="tbAvatar">🧙</div>
+      <div>
+        <div class="tb-name" id="tbName">...</div>
+        <div class="tb-sub">⚔️<span id="tbRank">1000</span> · 💎<span id="tbShards">0</span> · 🎟️<span id="tbTickets">5</span></div>
       </div>
     </div>
-    <div class="topbar-resources">
-      <span class="resource-chip">💎 <span id="topbarShards">0</span></span>
-      <span class="resource-chip">🎟️ <span id="topbarTickets">0</span></span>
-      <button id="giftBtn" class="gift-topbar-btn" title="Ежедневный подарок">🎁</button>
-      <button id="langBtn" class="lang-btn">🌐</button>
+    <div class="tb-right">
+      <button class="tb-btn pulse-once" id="btnGift" title="Ежедневный подарок">🎁</button>
+      <button class="tb-btn" id="btnPromo" title="Промокод">🎟️</button>
+      <button class="tb-btn" id="btnFriends" title="Друзья">👥</button>
+      <button class="tb-btn" id="btnLang">🌐</button>
     </div>
-  </div>
+  </header>
 
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab-btn active" data-tab="duel"><span class="tab-icon">⚔️</span><span class="tab-label">Дуэль</span></button>
-    <button class="tab-btn" data-tab="campaign"><span class="tab-icon">🏰</span><span class="tab-label">PvE</span></button>
-    <button class="tab-btn" data-tab="guild"><span class="tab-icon">🏛️</span><span class="tab-label">Гильдия</span></button>
-    <button class="tab-btn" data-tab="hero"><span class="tab-icon">👤</span><span class="tab-label">Герой</span></button>
-    <button class="tab-btn" data-tab="leaderboard"><span class="tab-icon">📊</span><span class="tab-label">Топ</span></button>
-    <button class="tab-btn" data-tab="shop"><span class="tab-icon">✨</span><span class="tab-label">Лавка</span></button>
-  </div>
+  <div id="eventBanner" class="event-banner" style="display:none"></div>
 
-  <!-- ═══ DUEL TAB ═══ -->
-  <div id="duel" class="tab-content active">
-    <div class="arena-card">
-      <div class="arena-bg"></div>
-      <div class="arena-players">
-        <div class="arena-player">
-          <div class="arena-avatar-wrap vip-ring" id="myAvatarWrap">
-            <div class="arena-avatar" id="myAvatar">🧙</div>
-          </div>
-          <div class="arena-name" id="myName">Вы</div>
-          <div class="hp-bar-wrap">
-            <div class="hp-bar"><div class="hp-fill" id="myHpFill" style="width:100%"></div></div>
-            <div class="hp-text"><span id="myHp">100</span>/100</div>
-          </div>
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-btn active" data-tab="duel"><span class="nav-ico">⚔️</span><span class="nav-lbl">Дуэль</span></button>
+    <button class="nav-btn" data-tab="campaign"><span class="nav-ico">🏰</span><span class="nav-lbl">PvE</span></button>
+    <button class="nav-btn" data-tab="guild"><span class="nav-ico">🏛️</span><span class="nav-lbl">Гильдия</span></button>
+    <button class="nav-btn" data-tab="hero"><span class="nav-ico">👤</span><span class="nav-lbl">Герой</span></button>
+    <button class="nav-btn" data-tab="leaderboard"><span class="nav-ico">📊</span><span class="nav-lbl">Топ</span></button>
+    <button class="nav-btn" data-tab="shop"><span class="nav-ico">✨</span><span class="nav-lbl">Лавка</span></button>
+  </nav>
+
+  <div class="page-scroll" id="pageScroll">
+
+    <!-- ─ DUEL PAGE ─────────────────────────────── -->
+    <div id="pg-duel" class="page active">
+      <div class="duel-lobby">
+        <div class="lobby-hero-preview">
+          <div class="lobby-avatar" id="lobbyAvatar">🧙</div>
+          <div class="lobby-pawn" id="lobbyPawn"></div>
+          <div class="lobby-name" id="lobbyName">Вы</div>
+          <div class="lobby-rank">⚔️ <span id="lobbyRank">1000</span></div>
         </div>
-
-        <div class="vs-center">
-          <div class="vs-badge">VS</div>
-          <div class="battle-timer" id="battleTimer" style="display:none">30</div>
+        <div class="lobby-actions">
+          <button id="btnFindDuel" class="btn-primary big">🔍 Найти бой</button>
+          <button id="btnFindFriendDuel" class="btn-secondary">⚔️ Вызвать друга</button>
         </div>
-
-        <div class="arena-player right">
-          <div class="arena-avatar-wrap" id="opponentAvatarWrap">
-            <div class="arena-avatar" id="opponentAvatar">👤</div>
+        <div id="searchState" class="search-state" style="display:none">
+          <div class="search-visual">
+            <div class="search-ring ring1"></div>
+            <div class="search-ring ring2"></div>
+            <div class="search-ring ring3"></div>
+            <span class="search-icon">⚔️</span>
           </div>
-          <div class="arena-name" id="opponentName">Противник</div>
-          <div class="hp-bar-wrap">
-            <div class="hp-bar"><div class="hp-fill enemy-fill" id="opponentHpFill" style="width:100%"></div></div>
-            <div class="hp-text"><span id="opponentHp">100</span>/100</div>
+          <p id="searchText">Поиск соперника...</p>
+          <div id="searchTimer" class="search-timer">0с</div>
+          <div id="searchAiWarn" class="ai-warn" style="display:none">
+            🤖 Через <span id="aiCountdown">25</span>с — бой с ИИ
           </div>
+          <button id="btnCancelSearch" class="btn-ghost">Отмена</button>
         </div>
-      </div>
-
-      <div class="energy-strip">
-        <span class="energy-icon">⚡</span>
-        <div class="energy-track">
-          <div class="energy-progress" id="energyBar" style="width:33%"></div>
+        <div class="duel-stats-row">
+          <div class="dstat"><span>🏆</span><span id="dStatWins">0</span><small>побед</small></div>
+          <div class="dstat"><span>💀</span><span id="dStatLosses">0</span><small>поражений</small></div>
+          <div class="dstat"><span>⚡</span><span id="dStatRank">1000</span><small>рейтинг</small></div>
         </div>
-        <span class="energy-val"><span id="energy">10</span>/<span id="maxEnergy">30</span></span>
+        <div id="challengesList" class="challenges-list" style="display:none">
+          <h4>📩 Входящие вызовы</h4>
+          <div id="challengesItems"></div>
+        </div>
       </div>
     </div>
 
-    <div class="skills-grid">
-      <button class="skill-card" data-skill="0">
-        <div class="skill-emoji">🔥</div>
-        <div class="skill-name" data-i18n="skill0">Огн. стрела</div>
-        <div class="skill-cost">5⚡</div>
-      </button>
-      <button class="skill-card" data-skill="1">
-        <div class="skill-emoji">❄️</div>
-        <div class="skill-name" data-i18n="skill1">Лед. щит</div>
-        <div class="skill-cost">4⚡</div>
-      </button>
-      <button class="skill-card" data-skill="2">
-        <div class="skill-emoji">🌿</div>
-        <div class="skill-name" data-i18n="skill2">Связь</div>
-        <div class="skill-cost">6⚡</div>
-      </button>
-      <button class="skill-card" data-skill="3">
-        <div class="skill-emoji">⚡</div>
-        <div class="skill-name" data-i18n="skill3">Молния</div>
-        <div class="skill-cost">8⚡</div>
-      </button>
-      <button class="skill-card" data-skill="4">
-        <div class="skill-emoji">🌟</div>
-        <div class="skill-name" data-i18n="skill4">Зов предков</div>
-        <div class="skill-cost">12⚡</div>
-      </button>
+    <!-- ─ CAMPAIGN PAGE ─────────────────────────── -->
+    <div id="pg-campaign" class="page">
+      <div class="ph"><span>🏰</span><h3>Кампания</h3></div>
+      <div id="chaptersContainer"></div>
     </div>
 
-    <button id="findDuelBtn" class="big-action-btn">
-      <span class="btn-icon">🔍</span>
-      <span data-i18n="findBattle">Найти бой</span>
-    </button>
-
-    <div id="searchingSpinner" class="searching-state" style="display:none">
-      <div class="spinner-ring"></div>
-      <span data-i18n="searching">Поиск соперника...</span>
-      <button id="cancelSearchBtn" class="cancel-btn">Отмена</button>
-    </div>
-
-    <div class="battle-log-wrap">
-      <div class="battle-log" id="battleLog"></div>
-    </div>
-  </div>
-
-  <!-- ═══ CAMPAIGN TAB ═══ -->
-  <div id="campaign" class="tab-content">
-    <div class="tab-header">
-      <span class="tab-header-icon">🏰</span>
-      <h3 data-i18n="campaign">Кампания Эхариса</h3>
-    </div>
-    <div id="chaptersContainer" class="chapters-grid"></div>
-
-    <div id="bossBattleModal" class="fullscreen-modal" style="display:none">
-      <div class="boss-battle-wrap">
-        <button id="closeBossBattle" class="close-circle-btn">✕</button>
-        <h3 id="bossName" class="boss-title">Босс</h3>
-        <div class="boss-avatar-big" id="bossAvatarBig">👹</div>
-        <div class="hp-bar-wrap">
-          <div class="hp-bar thick">
-            <div class="hp-fill boss-fill" id="bossHpFill" style="width:100%"></div>
-          </div>
-          <div class="hp-text"><span id="bossHp">100</span>/<span id="bossMaxHp">100</span></div>
+    <!-- ─ GUILD PAGE ────────────────────────────── -->
+    <div id="pg-guild" class="page">
+      <div class="ph"><span>🏛️</span><h3>Гильдии</h3></div>
+      <div id="guildNoMember">
+        <div class="search-row">
+          <input id="gSearchInp" class="input-field" placeholder="Найти гильдию...">
+          <button id="gSearchBtn" class="btn-icon">🔍</button>
         </div>
-        <div class="player-vs-section">
-          <div class="pve-player-bar">
-            <div class="arena-avatar small">🧙</div>
-            <div class="hp-bar-wrap flex1">
-              <div class="hp-bar">
-                <div class="hp-fill" id="pveMyHpFill" style="width:100%"></div>
-              </div>
-              <div class="hp-text"><span id="pveMyHp">100</span>/100 | ⚡<span id="pveEnergy">10</span></div>
+        <div id="gSearchResults"></div>
+        <button id="gCreateBtn" class="btn-primary">🏰 Создать гильдию (500 💎)</button>
+      </div>
+      <div id="guildMember" style="display:none">
+        <div class="guild-banner" id="gBanner">
+          <div class="gb-emoji" id="gEmoji">🏰</div>
+          <div class="gb-info">
+            <h3 id="gName">Название</h3>
+            <span id="gLvlBadge" class="badge-gold">Ур.1</span>
+            <p id="gDesc" class="muted-text"></p>
+          </div>
+        </div>
+        <div class="guild-stats-bar">
+          <div class="gst"><span>⭐</span><b id="gWarPts">0</b></div>
+          <div class="gst"><span>📈</span><b id="gExp">0</b>/<b id="gExpMax">1000</b></div>
+          <div class="gst"><span>👥</span><b id="gMems">0</b></div>
+        </div>
+        <div class="card-block">
+          <h4>📋 Квесты</h4><div id="gQuestsDiv"></div>
+        </div>
+        <div class="card-block">
+          <h4>🏗️ Здания</h4><div id="gBuildingsDiv"></div>
+        </div>
+        <div class="card-block">
+          <h4>💎 Вклад</h4>
+          <div class="chips-row">
+            <button class="chip-btn contrib" data-amount="10">10💎</button>
+            <button class="chip-btn contrib" data-amount="50">50💎</button>
+            <button class="chip-btn contrib" data-amount="100">100💎</button>
+            <button class="chip-btn contrib" data-amount="500">500💎</button>
+          </div>
+        </div>
+        <div class="card-block">
+          <h4>💬 Чат</h4>
+          <div id="gChatBox" class="chat-box"></div>
+          <div class="chat-row">
+            <input id="gChatInp" class="input-field flex1" placeholder="Сообщение...">
+            <button id="gChatSend" class="btn-icon">📨</button>
+          </div>
+        </div>
+        <div class="card-block"><h4>👥 Участники</h4><div id="gMembersDiv"></div></div>
+        <div class="card-block">
+          <h4>🐉 Рейд гильдии</h4>
+          <div id="gRaidActive" style="display:none">
+            <div class="raid-boss-name" id="raidName"></div>
+            <div class="hpbar-wrap">
+              <div class="hpbar"><div class="hpfill red" id="raidHpFill" style="width:100%"></div></div>
+              <span class="hp-txt"><span id="raidHpCur">0</span>/<span id="raidHpMax">0</span></span>
             </div>
+            <button id="raidAttackBtn" class="btn-primary">⚔️ Атаковать (10⚡)</button>
+          </div>
+          <button id="raidStartBtn" class="btn-secondary" style="display:none">🐉 Начать рейд</button>
+        </div>
+        <button id="gLeaveBtn" class="btn-danger">🚪 Покинуть гильдию</button>
+      </div>
+      <div class="card-block"><h4>🏆 Топ гильдий</h4><div id="gLbDiv"></div></div>
+    </div>
+
+    <!-- ─ HERO PAGE ──────────────────────────────── -->
+    <div id="pg-hero" class="page">
+      <div class="hero-profile-block">
+        <div class="hp-avatar-col">
+          <div class="big-avatar" id="heroAvatarBig">🧙</div>
+          <div id="heroPawnDisplay" class="pawn-on-hero"></div>
+          <div id="heroTempBadge" class="temp-badge" style="display:none"></div>
+          <button class="btn-sm" id="btnChangeClass">Сменить</button>
+        </div>
+        <div class="hp-stats-col">
+          <div class="stat-line"><span>⚔️ Атака</span><b id="hAtk">0%</b></div>
+          <div class="stat-line"><span>🛡️ Защита</span><b id="hDef">0%</b></div>
+          <div class="stat-line"><span>🔋 Энергия</span><b id="hNrg">0%</b></div>
+          <div class="stat-line"><span>🍀 Удача</span><b>10%</b></div>
+          <div class="stat-line"><span>🏆 Рейтинг</span><b id="hRank">1000</b></div>
+          <div class="stat-line"><span>✅ / ❌</span><b><span id="hW">0</span>/<span id="hL">0</span></b></div>
+        </div>
+      </div>
+      <div class="card-block">
+        <h4>🌀 Скиллы <span class="shard-badge">💎<span id="hShards">0</span></span></h4>
+        <div id="skillUpgDiv"></div>
+      </div>
+      <div class="card-block">
+        <h4>🎭 Скины</h4>
+        <div id="mySkinsGrid" class="skins-grid2"></div>
+      </div>
+      <div class="card-block">
+        <h4>🐾 Пешки (фамильяры)</h4>
+        <div id="myPawnsGrid" class="skins-grid2"></div>
+        <button id="btnBuyPawns" class="btn-secondary" style="margin-top:8px">🛒 Купить фамильяра</button>
+      </div>
+    </div>
+
+    <!-- ─ LEADERBOARD PAGE ──────────────────────── -->
+    <div id="pg-leaderboard" class="page">
+      <div class="ph"><span>🏆</span><h3>Топ-20 игроков</h3></div>
+      <div id="lbList"></div>
+    </div>
+
+    <!-- ─ SHOP PAGE ─────────────────────────────── -->
+    <div id="pg-shop" class="page">
+      <div class="ph"><span>✨</span><h3>Магазин</h3></div>
+      <div class="filter-tabs" id="filterTabs">
+        <button class="ftab active" data-r="all">Все</button>
+        <button class="ftab" data-r="common">Common</button>
+        <button class="ftab" data-r="rare">Rare</button>
+        <button class="ftab" data-r="epic">Epic</button>
+        <button class="ftab" data-r="legendary">Legend</button>
+      </div>
+      <div id="shopGrid" class="shop-grid2"></div>
+    </div>
+
+  </div><!-- page-scroll -->
+</div><!-- appScene -->
+
+<!-- ═══ BATTLE SCENE ════════════════════════════════════════════ -->
+<div id="battleScene" class="scene battle-bg" style="display:none">
+  <div class="battle-scene-inner">
+    <!-- VS intro overlay -->
+    <div id="vsIntro" class="vs-intro">
+      <div class="vs-fighter-left">
+        <div class="vs-avatar" id="vsAvatarL">🧙</div>
+        <div class="vs-name" id="vsNameL">Вы</div>
+      </div>
+      <div class="vs-text">VS</div>
+      <div class="vs-fighter-right">
+        <div class="vs-avatar" id="vsAvatarR">👤</div>
+        <div class="vs-name" id="vsNameR">Противник</div>
+      </div>
+    </div>
+
+    <!-- Main battle UI -->
+    <div id="battleUI" class="battle-ui" style="display:none">
+      <div class="battle-header">
+        <div class="bf-player me-side">
+          <div class="bf-avatar" id="bfAvatarMe">🧙</div>
+          <div class="bf-pawn" id="bfPawnMe"></div>
+          <div class="bf-name" id="bfNameMe">Вы</div>
+          <div class="hpbar-wrap">
+            <div class="hpbar"><div class="hpfill green-fill" id="bfHpMe" style="width:100%"></div></div>
+            <span class="hp-txt"><span id="bfHpMeVal">100</span>/100</span>
           </div>
         </div>
-        <div class="skills-grid pve-skills">
-          <button class="skill-card pve-skill" data-skill="0"><div class="skill-emoji">🔥</div><div class="skill-cost">5⚡</div></button>
-          <button class="skill-card pve-skill" data-skill="1"><div class="skill-emoji">❄️</div><div class="skill-cost">4⚡</div></button>
-          <button class="skill-card pve-skill" data-skill="2"><div class="skill-emoji">🌿</div><div class="skill-cost">6⚡</div></button>
-          <button class="skill-card pve-skill" data-skill="3"><div class="skill-emoji">⚡</div><div class="skill-cost">8⚡</div></button>
-          <button class="skill-card pve-skill" data-skill="4"><div class="skill-emoji">🌟</div><div class="skill-cost">12⚡</div></button>
+        <div class="bf-center">
+          <div id="bfTimer" class="bf-timer">30</div>
+          <div id="bfHitAnim" class="hit-anim"></div>
         </div>
-        <div class="battle-log pve-log" id="pveBattleLog"></div>
-        <button id="claimPveRewards" class="big-action-btn" style="display:none">🎁 Забрать награду</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ GUILD TAB ═══ -->
-  <div id="guild" class="tab-content">
-    <div class="tab-header">
-      <span class="tab-header-icon">🏛️</span>
-      <h3 data-i18n="guild">Гильдии</h3>
-    </div>
-
-    <div id="noGuildSection">
-      <div class="guild-search-bar">
-        <input type="text" id="guildSearchInput" placeholder="Поиск гильдии..." class="text-input">
-        <button id="searchGuildsBtn" class="icon-btn">🔍</button>
-      </div>
-      <div id="guildSearchResults" class="guild-list"></div>
-      <button id="createGuildBtn" class="big-action-btn">🏰 Создать гильдию (500 💎)</button>
-
-      <div id="createGuildModal" class="modal-overlay" style="display:none">
-        <div class="modal-card">
-          <button class="close-circle-btn" id="closeCreateGuild">✕</button>
-          <h3>Создание гильдии</h3>
-          <input type="text" id="newGuildName" placeholder="Название" class="text-input">
-          <input type="text" id="newGuildEmoji" placeholder="Эмодзи 🏰" class="text-input" maxlength="2">
-          <textarea id="newGuildDescription" placeholder="Описание..." class="text-input" rows="3"></textarea>
-          <button id="confirmCreateGuild" class="big-action-btn">Создать</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="guildSection" style="display:none">
-      <div class="guild-hero-card">
-        <div class="guild-emoji-big" id="guildEmoji">🏰</div>
-        <div>
-          <h3 id="guildName">Название</h3>
-          <span id="guildLevel" class="level-badge">Ур. 1</span>
-        </div>
-        <p id="guildDescription" class="guild-desc-text"></p>
-        <div class="guild-stats-row">
-          <div class="mini-stat">⭐<span id="guildWarPoints">0</span></div>
-          <div class="mini-stat">📈<span id="guildExp">0</span>/<span id="guildExpMax">1000</span></div>
-          <div class="mini-stat">👥<span id="guildMemberCount">0</span></div>
-        </div>
-      </div>
-
-      <div class="section-card">
-        <h4>🏗️ Здания</h4>
-        <div id="buildingsList"></div>
-      </div>
-
-      <div class="section-card">
-        <h4>💎 Вклад</h4>
-        <div class="chip-row">
-          <button class="chip-btn contribute-btn" data-amount="10">10 💎</button>
-          <button class="chip-btn contribute-btn" data-amount="50">50 💎</button>
-          <button class="chip-btn contribute-btn" data-amount="100">100 💎</button>
-          <button class="chip-btn contribute-btn" data-amount="500">500 💎</button>
-        </div>
-      </div>
-
-      <div class="section-card">
-        <h4>💬 Чат</h4>
-        <div id="guildChatMessages" class="chat-box"></div>
-        <div class="chat-input-row">
-          <input type="text" id="guildMessageInput" placeholder="Сообщение..." class="text-input flex1">
-          <button id="sendGuildMessage" class="icon-btn">📨</button>
-        </div>
-      </div>
-
-      <div class="section-card">
-        <h4>👥 Участники</h4>
-        <div id="guildMembersList"></div>
-      </div>
-
-      <div class="section-card">
-        <h4>🐉 Рейд</h4>
-        <div id="raidInfo"></div>
-        <div id="activeRaid" style="display:none">
-          <div class="raid-boss-name" id="raidBossName"></div>
-          <div class="hp-bar thick">
-            <div class="hp-fill raid-fill" id="raidBossHpFill" style="width:100%"></div>
+        <div class="bf-player opp-side">
+          <div class="bf-avatar enemy-glow" id="bfAvatarOpp">👤</div>
+          <div class="bf-pawn" id="bfPawnOpp"></div>
+          <div class="bf-name" id="bfNameOpp">Противник</div>
+          <div class="hpbar-wrap">
+            <div class="hpbar"><div class="hpfill red-fill" id="bfHpOpp" style="width:100%"></div></div>
+            <span class="hp-txt"><span id="bfHpOppVal">100</span>/100</span>
           </div>
-          <div class="hp-text"><span id="raidBossCurrentHp">0</span>/<span id="raidBossMaxHp">0</span></div>
-          <button id="attackRaidBoss" class="big-action-btn">⚔️ Атаковать (10 ⚡)</button>
-        </div>
-        <button id="startRaidBtn" class="big-action-btn" style="display:none">🐉 Начать рейд</button>
-      </div>
-
-      <button id="leaveGuildBtn" class="big-action-btn danger">🚪 Покинуть гильдию</button>
-    </div>
-
-    <div class="section-card">
-      <h4>🏆 Топ гильдий</h4>
-      <div id="guildLeaderboardList"></div>
-    </div>
-  </div>
-
-  <!-- ═══ HERO TAB ═══ -->
-  <div id="hero" class="tab-content">
-    <div class="hero-profile-card">
-      <div class="hero-avatar-chooser">
-        <div class="hero-avatar-display" id="heroAvatarDisplay">🧙</div>
-        <button class="small-btn" id="changeAvatarBtn">Сменить</button>
-      </div>
-      <div class="hero-stats-list">
-        <div class="stat-item"><span>⚔️ Атака</span><span class="stat-val" id="attackStat">0%</span></div>
-        <div class="stat-item"><span>🛡️ Защита</span><span class="stat-val" id="defenseStat">0%</span></div>
-        <div class="stat-item"><span>🔋 Энергия</span><span class="stat-val" id="energyStat">0%</span></div>
-        <div class="stat-item"><span>🍀 Удача</span><span class="stat-val">10%</span></div>
-        <div class="stat-item"><span>🏆 Рейтинг</span><span class="stat-val" id="heroRank">1000</span></div>
-        <div class="stat-item"><span>✅ Побед</span><span class="stat-val" id="heroWins">0</span></div>
-      </div>
-    </div>
-
-    <!-- Avatar picker modal -->
-    <div id="avatarPickerModal" class="modal-overlay" style="display:none">
-      <div class="modal-card">
-        <button class="close-circle-btn" id="closeAvatarPicker">✕</button>
-        <h3>Выбери героя</h3>
-        <div class="avatar-grid">
-          <div class="avatar-option" data-avatar="warrior">⚔️<br><small>Воин</small></div>
-          <div class="avatar-option" data-avatar="mage">🧙<br><small>Маг</small></div>
-          <div class="avatar-option" data-avatar="archer">🏹<br><small>Лучник</small></div>
-          <div class="avatar-option" data-avatar="rogue">🗡️<br><small>Разбойник</small></div>
-          <div class="avatar-option" data-avatar="paladin">🛡️<br><small>Паладин</small></div>
-          <div class="avatar-option" data-avatar="necromancer">💀<br><small>Некромант</small></div>
         </div>
       </div>
+
+      <div class="energy-section">
+        <span class="enrg-ico">⚡</span>
+        <div class="enrg-bar-bg"><div id="enrgFill" class="enrg-fill" style="width:33%"></div></div>
+        <span class="enrg-txt"><span id="enrgVal">10</span>/<span id="enrgMax">30</span></span>
+      </div>
+
+      <div class="skills-panel" id="skillsPanel">
+        <button class="skill-btn" data-si="0">
+          <div class="sb-ico">🔥</div><div class="sb-nm">Огн.стрела</div><div class="sb-cost">5⚡</div>
+        </button>
+        <button class="skill-btn" data-si="1">
+          <div class="sb-ico">❄️</div><div class="sb-nm">Лед.щит</div><div class="sb-cost">4⚡</div>
+        </button>
+        <button class="skill-btn" data-si="2">
+          <div class="sb-ico">🌿</div><div class="sb-nm">Связь</div><div class="sb-cost">6⚡</div>
+        </button>
+        <button class="skill-btn" data-si="3">
+          <div class="sb-ico">⚡</div><div class="sb-nm">Молния</div><div class="sb-cost">8⚡</div>
+        </button>
+        <button class="skill-btn" data-si="4">
+          <div class="sb-ico">🌟</div><div class="sb-nm">Зов</div><div class="sb-cost">12⚡</div>
+        </button>
+      </div>
+
+      <div class="battle-log-box" id="battleLog"></div>
     </div>
 
-    <div class="section-card">
-      <h4>🌀 Скиллы</h4>
-      <div class="shards-badge">💎 <span id="shardsCount">0</span> осколков</div>
-      <div id="skillsLevels"></div>
-    </div>
-
-    <div class="section-card">
-      <h4>🎭 Мои скины</h4>
-      <div id="skinsList" class="skins-grid"></div>
+    <!-- Battle result overlay -->
+    <div id="battleResult" class="battle-result" style="display:none">
+      <div class="result-icon" id="resultIcon">🏆</div>
+      <div class="result-title" id="resultTitle">Победа!</div>
+      <div class="result-rewards" id="resultRewards"></div>
+      <button id="resultCloseBtn" class="btn-primary">Продолжить</button>
     </div>
   </div>
+</div>
 
-  <!-- ═══ LEADERBOARD TAB ═══ -->
-  <div id="leaderboard" class="tab-content">
-    <div class="tab-header">
-      <span class="tab-header-icon">🏆</span>
-      <h3 data-i18n="leaderboard">Топ-20 игроков</h3>
+<!-- ═══ BOSS BATTLE SCENE ═══════════════════════════════════════ -->
+<div id="bossScene" class="scene boss-bg" style="display:none">
+  <button id="bossBackBtn" class="back-btn">← Выход</button>
+  <div class="boss-scene-inner">
+    <div class="boss-anim-wrap">
+      <div id="bossBigEmoji" class="boss-emoji-big">👹</div>
+      <div class="boss-hp-section">
+        <h3 id="bossTitle">Босс</h3>
+        <div class="hpbar-wrap">
+          <div class="hpbar thick"><div class="hpfill red-fill" id="bossHpFill" style="width:100%"></div></div>
+          <span class="hp-txt"><span id="bossHpCur">100</span>/<span id="bossHpMax">100</span></span>
+        </div>
+      </div>
     </div>
-    <div class="leaderboard-list" id="leaderboardList"></div>
+    <div class="boss-player-row">
+      <div class="bpr-avatar" id="bossMyAvatar">🧙</div>
+      <div class="bpr-stats">
+        <div class="hpbar-wrap">
+          <div class="hpbar"><div class="hpfill green-fill" id="bossMyHpFill" style="width:100%"></div></div>
+          <span class="hp-txt"><span id="bossMyHp">100</span>/100</span>
+        </div>
+        <span class="enrg-txt" style="margin-top:4px">⚡<span id="bossMyEnrg">10</span></span>
+      </div>
+    </div>
+    <div class="skills-panel boss-skills" id="bossSkillsPanel">
+      <button class="skill-btn" data-bsi="0"><div class="sb-ico">🔥</div><div class="sb-cost">5⚡</div></button>
+      <button class="skill-btn" data-bsi="1"><div class="sb-ico">❄️</div><div class="sb-cost">4⚡</div></button>
+      <button class="skill-btn" data-bsi="2"><div class="sb-ico">🌿</div><div class="sb-cost">6⚡</div></button>
+      <button class="skill-btn" data-bsi="3"><div class="sb-ico">⚡</div><div class="sb-cost">8⚡</div></button>
+      <button class="skill-btn" data-bsi="4"><div class="sb-ico">🌟</div><div class="sb-cost">12⚡</div></button>
+    </div>
+    <div class="battle-log-box" id="bossLog"></div>
+    <button id="bossClaimBtn" class="btn-primary" style="display:none;margin-top:10px">🎁 Забрать награду</button>
   </div>
+</div>
 
-  <!-- ═══ SHOP TAB ═══ -->
-  <div id="shop" class="tab-content">
-    <div class="tab-header">
-      <span class="tab-header-icon">✨</span>
-      <h3 data-i18n="shop">Магазин скинов</h3>
-    </div>
-    <div class="rarity-filter" id="rarityFilter">
-      <button class="filter-btn active" data-rarity="all">Все</button>
-      <button class="filter-btn" data-rarity="common">Common</button>
-      <button class="filter-btn" data-rarity="rare">Rare</button>
-      <button class="filter-btn" data-rarity="epic">Epic</button>
-      <button class="filter-btn" data-rarity="legendary">Legendary</button>
-    </div>
-    <div id="shopItems" class="shop-grid"></div>
+<!-- ═══ OVERLAYS (modals) ═══════════════════════════════════════ -->
+
+<!-- Gift -->
+<div id="ovGift" class="overlay" style="display:none">
+  <div class="modal-card">
+    <div class="modal-big-ico gift-bounce" id="giftIco">🎁</div>
+    <h2>Ежедневный подарок!</h2>
+    <div id="giftRewardList" class="reward-list"></div>
+    <button class="btn-primary" id="btnGiftClaim">Забрать! 🎉</button>
   </div>
+</div>
 
-</div><!-- end .content -->
+<!-- Welcome bonus -->
+<div id="ovWelcome" class="overlay" style="display:none">
+  <div class="modal-card glow-card">
+    <div class="modal-big-ico">🎁</div>
+    <h2>Добро пожаловать!</h2>
+    <p class="muted-text">Вам выдан временный скин на 72 часа:</p>
+    <div id="welcomeSkinLine" class="big-reward"></div>
+    <p class="muted-text">Успейте им воспользоваться!</p>
+    <button class="btn-primary" onclick="closeOv('ovWelcome')">Принять! 🎊</button>
+  </div>
+</div>
+
+<!-- Promo code -->
+<div id="ovPromo" class="overlay" style="display:none">
+  <div class="modal-card">
+    <button class="close-x" onclick="closeOv('ovPromo')">✕</button>
+    <div class="modal-big-ico">🎟️</div>
+    <h2>Промокод</h2>
+    <input id="promoInp" class="input-field" placeholder="Введите код..." autocapitalize="characters" spellcheck="false">
+    <div id="promoMsg" class="promo-msg"></div>
+    <button class="btn-primary" id="btnPromoSubmit">Активировать</button>
+  </div>
+</div>
+
+<!-- Friends panel -->
+<div id="ovFriends" class="overlay" style="display:none">
+  <div class="modal-card wide">
+    <button class="close-x" onclick="closeOv('ovFriends')">✕</button>
+    <h2>👥 Друзья</h2>
+    <div class="search-row">
+      <input id="friendSearchInp" class="input-field flex1" placeholder="Поиск по имени...">
+      <button id="btnFriendSearch" class="btn-icon">🔍</button>
+    </div>
+    <div id="friendSearchRes"></div>
+    <h4 style="margin:12px 0 6px">Входящие запросы</h4>
+    <div id="friendIncoming"></div>
+    <h4 style="margin:12px 0 6px">Мои друзья</h4>
+    <div id="friendsList"></div>
+  </div>
+</div>
+
+<!-- Hero class picker -->
+<div id="ovClassPick" class="overlay" style="display:none">
+  <div class="modal-card">
+    <button class="close-x" onclick="closeOv('ovClassPick')">✕</button>
+    <h2>Выбери класс</h2>
+    <div class="class-grid" id="classGrid"></div>
+  </div>
+</div>
+
+<!-- Pawn shop -->
+<div id="ovPawnShop" class="overlay" style="display:none">
+  <div class="modal-card wide">
+    <button class="close-x" onclick="closeOv('ovPawnShop')">✕</button>
+    <h2>🐾 Фамильяры</h2>
+    <div id="pawnShopGrid" class="skins-grid2"></div>
+  </div>
+</div>
+
+<!-- Tutorial -->
+<div id="ovTutorial" class="overlay" style="display:none">
+  <div class="modal-card">
+    <div class="modal-big-ico" id="tutIco">🌌</div>
+    <h2 id="tutTitle">Добро пожаловать!</h2>
+    <p id="tutText" class="muted-text"></p>
+    <div class="dots-row" id="tutDots"></div>
+    <button class="btn-primary" id="btnTutNext">Далее →</button>
+  </div>
+</div>
+
+<!-- Guild create -->
+<div id="ovGuildCreate" class="overlay" style="display:none">
+  <div class="modal-card">
+    <button class="close-x" onclick="closeOv('ovGuildCreate')">✕</button>
+    <h2>Создать гильдию</h2>
+    <input id="gcName"  class="input-field" placeholder="Название">
+    <input id="gcEmoji" class="input-field" placeholder="Эмодзи 🏰" maxlength="2">
+    <textarea id="gcDesc" class="input-field" placeholder="Описание..." rows="3"></textarea>
+    <button class="btn-primary" id="btnGcConfirm">Создать (500 💎)</button>
+  </div>
+</div>
 
 <script src="script.js"></script>
 </body>
-                </html>
+</html>
